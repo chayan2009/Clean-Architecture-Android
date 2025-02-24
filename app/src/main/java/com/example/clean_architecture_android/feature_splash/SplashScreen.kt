@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.clean_architecture_android.navigation.Screen
 import kotlinx.coroutines.delay
-jj
+
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun SplashScreen(navController: NavController) {
