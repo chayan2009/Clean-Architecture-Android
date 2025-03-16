@@ -1,24 +1,45 @@
 package com.example.clean_architecture_android.data.repository
 
 
+import com.example.clean_architecture_android.core.common.ProductMapper
+import com.example.clean_architecture_android.data.db.ProductDao
 import com.example.clean_architecture_android.data.source.api.ProductApi
 import com.example.clean_architecture_android.domain.model.Product
 import com.example.clean_architecture_android.domain.repository.ProductRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
-import javax.inject.Inject
 
-class ProductRepositoryImpl @Inject constructor(
-    private val api: ProductApi
+class ProductRepositoryImpl(
+    private val api: ProductApi,
+    private val productDao: ProductDao
 ) : ProductRepository {
 
     override suspend fun getProducts(): Flow<List<Product>> = flow {
-        try {
-            val response = api.getProducts()
-            emit(response.map { it.toDomain() }) // Convert DTO to Domain Model
-        } catch (e: Exception) {
-            emit(emptyList()) // Handle error case
+        val cachedProducts = productDao.getProducts()
+            .firstOrNull()
+            ?.let { ProductMapper.entityListToDomainList(it) } ?: emptyList()
+
+        println("Cached Products size: ${cachedProducts.size}")
+
+        if (cachedProducts.isNotEmpty()) {
+            emit(cachedProducts)
+        } else {
+            try {
+                val response = api.getProducts()
+                println("API Response size: ${response.size}")
+
+                val domainProducts = response
+                val entityList = ProductMapper.domainListToEntityList(domainProducts)
+
+                productDao.insertProducts(entityList)
+                emit(domainProducts)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                emit(emptyList())
+            }
         }
     }
-
 }
+
+
