@@ -24,7 +24,7 @@ fun SplashScreen(navController: NavController) {
     LaunchedEffect(Unit) {
         delay(2000)
         navController.navigate(Screen.LoginScreen.route) {
-            popUpTo(Screen.MainScreen.route) { inclusive = true }
+            popUpTo(Screen.LoginScreen.route) { inclusive = true }
         }
     }
 

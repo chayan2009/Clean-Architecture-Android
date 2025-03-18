@@ -1,39 +1,81 @@
 package com.example.clean_architecture_android.core.common
 
+import com.example.clean_architecture_android.data.source.dto.MasterEntity
 import com.example.clean_architecture_android.data.source.dto.ProductEntity
-import com.example.clean_architecture_android.domain.model.Product
+import com.example.clean_architecture_android.domain.model.Dimensions
+import com.example.clean_architecture_android.domain.model.Master
+import com.example.clean_architecture_android.domain.model.ProductItem
 
 object ProductMapper {
 
-    fun entityToDomain(entity: ProductEntity): Product {
-        return Product(
-            id = entity.id,
-            title = entity.title,
-            price = entity.price,
-            category = entity.category,
-            description = entity.description,
-            image = entity.image,
-            rating = entity.rating
+    fun mapToMasterEntity(master: Master): MasterEntity {
+        return MasterEntity(
+            total = master.total,
+            limit = master.limit,
+            skip = master.skip,
+            products = master.products.map { it.toEntity() }
         )
     }
 
-    fun domainToEntity(product: Product): ProductEntity {
+    fun mapToDomain(masterEntity: MasterEntity): Master {
+        return Master(
+            total = masterEntity.total,
+            limit = masterEntity.limit,
+            skip = masterEntity.skip,
+            products = masterEntity.products.map { it.toDomain() }
+        )
+    }
+
+    private fun ProductItem.toEntity(): ProductEntity {
         return ProductEntity(
-            id = product.id,
-            title = product.title,
-            price = product.price,
-            category = product.category,
-            description = product.description,
-            image = product.image,
-            rating = product.rating
+            id = id,
+            availabilityStatus = availabilityStatus ?: "",
+            brand = brand ?: "",
+            category = category ?: "",
+            description = description ?: "",
+            dimensions = dimensions,
+            discountPercentage = discountPercentage ?: 0.0,
+            images = images ?: emptyList(),
+            minimumOrderQuantity = minimumOrderQuantity ?: 0,
+            price = price ?: 0.0,
+            rating = rating ?: 0.0,
+            returnPolicy = returnPolicy ?: "",
+            reviews = reviews ?: emptyList(),
+            shippingInformation = shippingInformation ?: "",
+            sku = sku ?: "",
+            stock = stock ?: 0,
+            tags = tags ?: emptyList(),
+            thumbnail = thumbnail ?: "",
+            title = title ?: "",
+            warrantyInformation = warrantyInformation ?: "",
+            weight = weight ?: 0
         )
     }
 
-    fun entityListToDomainList(entities: List<ProductEntity>): List<Product> {
-        return entities.map { entityToDomain(it) }
-    }
-
-    fun domainListToEntityList(products: List<Product>): List<ProductEntity> {
-        return products.map { domainToEntity(it) }
+    private fun ProductEntity.toDomain(): ProductItem {
+        return ProductItem(
+            id = id,
+            availabilityStatus = availabilityStatus,
+            brand = brand,
+            category = category,
+            description = description,
+            dimensions = dimensions ?: Dimensions(0.0, 0.0, 0.0), // Provide a default value
+            discountPercentage = discountPercentage,
+            images = images,
+            minimumOrderQuantity = minimumOrderQuantity,
+            price = price,
+            rating = rating,
+            returnPolicy = returnPolicy,
+            reviews = reviews,
+            shippingInformation = shippingInformation,
+            sku = sku,
+            stock = stock,
+            tags = tags,
+            thumbnail = thumbnail,
+            title = title,
+            warrantyInformation = warrantyInformation,
+            weight = weight,
+            meta = TODO()
+        )
     }
 }

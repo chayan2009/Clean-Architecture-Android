@@ -31,15 +31,15 @@ fun LoginScreen(navController: NavHostController, viewModel: LoginViewModel = hi
     val passwordError by viewModel.passwordError.collectAsState()
     val loginState by viewModel.loginState.collectAsState()
 
-    var loginAttempted by remember { mutableStateOf(true) }
+    var loginAttempted by remember { mutableStateOf(false) }
     val currentLoginState by rememberUpdatedState(loginState)
 
     LaunchedEffect(loginState) {
-        if (loginState == true) {
-            navController.navigate(Screen.MainScreen.route) {
-                popUpTo(Screen.MainScreen.route) { inclusive = true }
-            }
-        }
+//        if (loginState == true) {
+//            navController.navigate(Screen.MainScreen.route) {
+//                popUpTo(Screen.MainScreen.route) { inclusive = true }
+//            }
+//        }
     }
 
     DisposableEffect(Unit) {
@@ -111,8 +111,7 @@ fun LoginScreen(navController: NavHostController, viewModel: LoginViewModel = hi
 
             Button(
                 onClick = {
-                   // loginAttempted = true
-                    viewModel.login()
+                    navController.navigate(Screen.MainScreen.route)
                 },
                 shape = RoundedCornerShape(24.dp),
                 modifier = Modifier.fillMaxWidth()

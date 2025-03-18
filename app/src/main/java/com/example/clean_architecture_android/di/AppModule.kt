@@ -2,13 +2,13 @@ package com.example.clean_architecture_android.di
 
 import android.content.Context
 import androidx.room.Room
+import com.example.clean_architecture_android.core.common.Constants
 import com.example.clean_architecture_android.core.database.AppDatabase
 import com.example.clean_architecture_android.data.db.ProductDao
 import com.example.clean_architecture_android.data.repository.ProductRepositoryImpl
 import com.example.clean_architecture_android.data.source.api.ProductApi
-import com.example.ecommerce_app.core.common.Constants
 import com.example.clean_architecture_android.domain.repository.ProductRepository
-import com.example.clean_architecture_android.domain.usecase.GetProductsUseCase
+import com.example.clean_architecture_android.domain.usecase.FetchProductsUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,6 +22,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
+
     @Provides
     @Singleton
     fun provideRetrofit(): Retrofit = Retrofit.Builder()
@@ -34,28 +35,33 @@ object AppModule {
     fun provideApiService(retrofit: Retrofit): ProductApi =
         retrofit.create(ProductApi::class.java)
 
-    @Provides
-    @Singleton
-    fun provideProductRepository(api: ProductApi, productDao: ProductDao): ProductRepository =
-        ProductRepositoryImpl(api,productDao)
-
-    @Provides
-    @Singleton
-    fun provideProductUseCase(repository: ProductRepository): GetProductsUseCase =
-        GetProductsUseCase(repository)
 
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
         return Room.databaseBuilder(
-            context.applicationContext,
+            context,
             AppDatabase::class.java,
-            "food"
-        ).build()
+            "app_databases"
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
+
+    @Provides
+    fun provideProductDao(database: AppDatabase): ProductDao {
+        return database.productDao()
+    }
+
     @Provides
     @Singleton
-    fun provideProductDao(db: AppDatabase): ProductDao = db.productDao()
+    fun provideProductRepository(
+        apiService: ProductApi,
+        masterDao: ProductDao
+    ): ProductRepository = ProductRepositoryImpl(apiService, masterDao)
 
+    @Provides
+    @Singleton
+    fun provideFetchProductsUseCase(repository: ProductRepository) = FetchProductsUseCase(repository)
 
 }

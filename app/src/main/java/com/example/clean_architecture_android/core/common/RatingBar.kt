@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import coil.compose.rememberAsyncImagePainter
-import com.example.clean_architecture_android.domain.model.Product
+import com.example.clean_architecture_android.domain.model.ProductItem
 
 @Composable
 fun RatingBar(
@@ -70,7 +70,7 @@ fun RatingBar(
 // Updated ProductCard with RatingBar below title
 @Composable
 fun ProductCard(
-    product: Product,
+    product: ProductItem,
     onProductClick: () -> Unit,
     onCartClick: () -> Unit,
     onFavoriteClick: () -> Unit
@@ -85,7 +85,6 @@ fun ProductCard(
             .clickable { onProductClick() }
     ) {
         Column {
-            // Image Section with Favorite Icon
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -93,7 +92,7 @@ fun ProductCard(
                     .aspectRatio(1f)
             ) {
                 Image(
-                    painter = rememberAsyncImagePainter(product.image),
+                    painter = rememberAsyncImagePainter(product.thumbnail),
                     contentDescription = product.title,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
@@ -124,18 +123,15 @@ fun ProductCard(
                         fontSize = 18.sp,
                         maxLines = 1
                     )
-                    // Display the star rating visually
                     RatingBar(
-                        rating = product.rating.rate,
+                        rating = product.rating,
                         modifier = Modifier.padding(top = 4.dp)
                     )
-                    // Optionally, you can also display the count as text:
                     Text(
-                        text = "(${product.rating.count})",
+                        text = "(${product.rating})",
                         fontSize = 14.sp,
                         color = Color.Gray
                     )
-                    // Category text
                     Text(
                         text = product.category,
                         fontWeight = FontWeight.Medium,
@@ -144,7 +140,6 @@ fun ProductCard(
                         color = Color.Gray
                     )
                 }
-                // Price and Cart Icon Row
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,

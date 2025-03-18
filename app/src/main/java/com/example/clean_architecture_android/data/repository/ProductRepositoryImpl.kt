@@ -1,45 +1,47 @@
 package com.example.clean_architecture_android.data.repository
 
-
-import com.example.clean_architecture_android.core.common.ProductMapper
 import com.example.clean_architecture_android.data.db.ProductDao
 import com.example.clean_architecture_android.data.source.api.ProductApi
-import com.example.clean_architecture_android.domain.model.Product
+import com.example.clean_architecture_android.data.source.api.ProductResponse
+import com.example.clean_architecture_android.data.source.dto.ProductEntity
 import com.example.clean_architecture_android.domain.repository.ProductRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
+import javax.inject.Inject
 
-class ProductRepositoryImpl(
+class ProductRepositoryImpl @Inject constructor(
     private val api: ProductApi,
     private val productDao: ProductDao
 ) : ProductRepository {
 
-    override suspend fun getProducts(): Flow<List<Product>> = flow {
-        val cachedProducts = productDao.getProducts()
-            .firstOrNull()
-            ?.let { ProductMapper.entityListToDomainList(it) } ?: emptyList()
+    override suspend fun getProducts(): Flow<List<ProductEntity>> = flow {
+        val cachedProducts = productDao.getProducts().firstOrNull()
 
-        println("Cached Products size: ${cachedProducts.size}")
-
-        if (cachedProducts.isNotEmpty()) {
+        if (!cachedProducts.isNullOrEmpty()) {
+            println("Returning cached products: ${cachedProducts.size}")
             emit(cachedProducts)
         } else {
+            println("No cached products found, fetching from API...")
+
             try {
-                val response = api.getProducts()
-                println("API Response size: ${response.size}")
+                val response: ProductResponse = api.getProducts()
+                val productList = response.products
 
-                val domainProducts = response
-                val entityList = ProductMapper.domainListToEntityList(domainProducts)
+                if (productList.isNotEmpty()) {
+                    println("API Response size: ${productList.size}")
 
-                productDao.insertProducts(entityList)
-                emit(domainProducts)
+                    productDao.insertProducts(productList)
+
+                    emit(productList)
+                } else {
+                    println("API returned an empty product list")
+                    emit(emptyList())
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
-                emit(emptyList())
+                throw Exception("Error fetching products: ${e.localizedMessage}")
             }
         }
     }
 }
-
-
